@@ -16,7 +16,12 @@ public interface RadCheckRepo extends RadiusRepository<RadCheck, Integer> {
 
     void deleteAllByUsername(String username);
 
-    void deleteByUsernameAndAttribute(String name, String attribute);
+    // JPA to delete records by their associated username, operation and value.  JPA's are implicitly declared and
+    // are directly related to their database schema
+    void deleteByUsernameAndAttributeAndOpAndValue(String username, String attribute, String op, String value);
+
+    // Modify to delete including ID as part of the lookup (preventing deletion of all records for a user)
+    void deleteByIdAndUsernameAndAttribute(Integer Id, String name, String attribute);
 
     void deleteAllByAttribute(String attribute);
 

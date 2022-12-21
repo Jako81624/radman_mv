@@ -16,7 +16,9 @@ public interface RadReplyRepo extends RadiusRepository<RadReply, Integer> {
 
     void deleteAllByUsername(String username);
 
-    void deleteByUsernameAndAttribute(String name, String attribute);
+    void deleteAllByUsernameAndAttributeAndOpAndValue(String username, String attribute, String op, String value);
+
+    void deleteByIdAndUsernameAndAttribute(Integer Id, String name, String attribute);
 
     void deleteAllByAttribute(String attribute);
 

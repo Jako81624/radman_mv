@@ -17,7 +17,9 @@ public interface RadGroupCheckRepo extends RadiusRepository<RadGroupCheck, Integ
 
     void deleteAllByGroupName(String groupName);
 
-    void deleteAllByGroupNameAndAttribute(String name, String attribute);
+    void deleteByGroupNameAndAttributeAndOpAndValue(String name, String attribute, String operator, String value);
+
+    void deleteAllByIdAndGroupNameAndAttribute(Integer Id, String name, String attribute);
 
     void deleteAllByAttribute(String attribute);
 

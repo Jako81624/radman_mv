@@ -72,6 +72,9 @@ public class AuthView extends VerticalLayout {
     private final AttributeService attributeService;
     private final SecurityService securityService;
 
+    // columnsList is a class variable that stores the list of table columns for later reference
+    private Map<String, String> columnsList;
+
     @Autowired
     public AuthView(AuthService authService, RadiusUserService userService,
                     AttributeService attributeService, SecurityService securityService) {
@@ -107,8 +110,31 @@ public class AuthView extends VerticalLayout {
                 optional.ifPresent(row -> {
                     String name = row.get("name");
                     String type = row.get("type");
+                    // Since we're deleting single attributes that might have recurrent names but different operations and
+                    // values, adding value, operator and attribute forms a more complex composite key that only deletes individual records
+                    String value = "";
+                    String operator = "";
+                    String attribute = "";
+                    for (String key : columnsList.keySet()) {
+                        // {}, :, name and type are always guaranteed to appear in the array as it stands.  Below statement only
+                        // processes the key if it isn't one of said keys or Vaadin crashes
+                        if (!key.equals("{}") && !key.equals(":") && !key.equals("type") && !key.equals("name")) {
+                            // If row is not empty e.g. contains a value (since there will be a lot of blank columns when the
+                            // attributes list increases (and Vaadin returns null for empty columns)
+                            if (row.get(key) != null) {
+                                // Value is always three characters offset (two for operator, one for a whitespace)
+                                value = row.get(key).substring(3);
+                                // Operator is always at the start of the string and takes up two characters
+                                operator = row.get(key).substring(0,2);
+                                // Attribute is already filtered
+                                attribute = key;
+                            }
+
+                        }
+                    }
                     try {
-                        deleteAssigment(name, type);
+                        // Delete the record with a composite lookup of name, type, attribute, operator and field
+                        deleteAssigment(name, type, attribute, operator, value);
                         deleteDialog.setOpened(false);
                         refreshGrid();
                     } catch (Exception e) {
@@ -124,8 +150,8 @@ public class AuthView extends VerticalLayout {
             Button deleteBtn = new Button("Delete", event -> {
                 Optional<Map<String, String>> optional = grid.getSelectionModel().getFirstSelectedItem();
                 optional.ifPresent(row -> {
-                    deleteDialog.setDescription("Are you sure you want to delete '" +
-                            row.get("name") + "' user and its attributes?");
+                    // Make the dialog box more generic now that it supports MV attributes
+                    deleteDialog.setDescription("Are you sure you want to delete the selected row?");
                     deleteDialog.setOpened(true);
                 });
             });
@@ -161,6 +187,8 @@ public class AuthView extends VerticalLayout {
                         -> map.get(key)).setHeader(key));
                 grid.getColumns().forEach(column -> column.setSortable(true));
             }
+            // During refresh, update the class variable containing the column list for reference later
+            columnsList = authsDto.getColumnsSpec();
             grid.setItems(authsDto.getData());
         }
 
@@ -170,7 +198,8 @@ public class AuthView extends VerticalLayout {
 
         abstract AttributeAssignmentDialog<U, ? extends AttributeDto> getAssigmentDialog();
 
-        abstract void deleteAssigment(String name, String type);
+        // Abstract template for row deletion.  Implemented for Authorization and Authentication
+        abstract void deleteAssigment(String name, String type, String attribute, String operator, String value);
 
     }
 
@@ -198,8 +227,8 @@ public class AuthView extends VerticalLayout {
         }
 
         @Override
-        void deleteAssigment(String name, String type) {
-            authService.deleteAuthentication(name, type);
+        void deleteAssigment(String name, String type, String attribute, String operator, String value) {
+            authService.deleteAuthentication(name, type, attribute, operator, value);
         }
 
     }
@@ -228,8 +257,8 @@ public class AuthView extends VerticalLayout {
         }
 
         @Override
-        void deleteAssigment(String name, String type) {
-            authService.deleteAuthorization(name, type);
+        void deleteAssigment(String name, String type, String attribute, String operator, String value) {
+            authService.deleteAuthorization(name, type, attribute, operator, value);
         }
 
     }

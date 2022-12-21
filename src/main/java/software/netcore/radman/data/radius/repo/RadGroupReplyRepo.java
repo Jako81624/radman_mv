@@ -16,7 +16,9 @@ public interface RadGroupReplyRepo extends RadiusRepository<RadGroupReply, Integ
 
     void deleteAllByGroupName(String name);
 
-    void deleteAllByGroupNameAndAttribute(String name, String attribute);
+    void deleteByGroupNameAndAttributeAndOpAndValue(String name, String attribute, String op, String value);
+
+    void deleteAllByIdAndGroupNameAndAttribute(Integer Id, String name, String attribute);
 
     void deleteAllByAttribute(String attribute);
 
