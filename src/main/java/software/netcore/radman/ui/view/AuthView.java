@@ -100,14 +100,12 @@ public class AuthView extends VerticalLayout {
 
         AuthGrid() {
             setWidth("100%");
-
             RoleDto role = securityService.getLoggedUserRole();
             grid = new Grid<>();
             deleteDialog = new ConfirmationDialog("400px");
             deleteDialog.setTitle("Delete assigned attributes");
             deleteDialog.setConfirmListener(() -> {
-                AuthsDto authsDto = getAuthsDto(filter);
-                columnsList = authsDto.getColumnsSpec();
+                refreshColumnsList();
                 Optional<Map<String, String>> optional = grid.getSelectionModel().getFirstSelectedItem();
                 optional.ifPresent(row -> {
                     String name = row.get("name");
@@ -192,6 +190,11 @@ public class AuthView extends VerticalLayout {
             // During refresh, update the class variable containing the column list for reference later
             columnsList = authsDto.getColumnsSpec();
             grid.setItems(authsDto.getData());
+        }
+
+        void refreshColumnsList() {
+            AuthsDto authsDto = getAuthsDto(filter);
+            columnsList = authsDto.getColumnsSpec();
         }
 
         abstract String getGridTitle();
