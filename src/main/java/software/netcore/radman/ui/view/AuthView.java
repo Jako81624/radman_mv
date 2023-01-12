@@ -106,6 +106,8 @@ public class AuthView extends VerticalLayout {
             deleteDialog = new ConfirmationDialog("400px");
             deleteDialog.setTitle("Delete assigned attributes");
             deleteDialog.setConfirmListener(() -> {
+                AuthsDto authsDto = getAuthsDto(filter);
+                columnsList = authsDto.getColumnsSpec();
                 Optional<Map<String, String>> optional = grid.getSelectionModel().getFirstSelectedItem();
                 optional.ifPresent(row -> {
                     String name = row.get("name");
